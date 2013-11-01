@@ -1,0 +1,21 @@
+- hosts: devops.morisbak.net
+  roles:
+    - deploy
+  user: appuser
+
+  vars_prompt:
+  - name: "version"
+    prompt: "Please enter the version you want to deploy"
+    private: no
+
+  - name: "env"
+    prompt: "Please enter the environment you want to deploy to (test|prod)"
+    private: no
+
+  vars:
+    project: devops
+    artifact: myapp
+    deploy_artifact: ${project}-${artifact}-${version}
+    home_path: /home/{{ ansible_user_id }}
+    env_path: ${home_path}/${env}
+    deploy_dir: ${env_path}/{{ ansible_date_time['epoch'] }}

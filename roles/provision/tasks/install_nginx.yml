@@ -1,0 +1,8 @@
+- name: ensure installed nginx
+  apt: pkg=nginx state=installed
+  sudo: yes
+  notify:
+    - restart nginx
+  tags:
+    - nginx
+

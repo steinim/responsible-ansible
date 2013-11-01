@@ -1,0 +1,8 @@
+- hosts: devops.morisbak.net
+  roles:
+    - provision
+  user: appuser
+
+  vars:
+    artifact: myapp
+

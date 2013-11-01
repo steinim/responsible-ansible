@@ -1,0 +1,3 @@
+- name: restart app
+  service: name=${env}_${artifact} state=restarted
+

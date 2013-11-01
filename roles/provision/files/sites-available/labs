@@ -1,0 +1,69 @@
+# http://wiki.nginx.org/Pitfalls
+# http://wiki.nginx.org/QuickStart
+# http://wiki.nginx.org/Configuration
+
+# Backend servers prod
+upstream labs_backend_prod {
+    server 127.0.0.1:7002;
+    server 127.0.0.1:7003;
+    keepalive 64;
+}
+
+# Backend servers test
+upstream labs_backend_test {
+    server 127.0.0.1:7004;
+    server 127.0.0.1:7005;
+    keepalive 64;
+}
+
+# HTTP -> HTTPS redirect
+server {
+    listen 80;
+    return 301 https://$host$request_uri;
+}
+
+# Prod Server
+server {
+    listen 443 default_server;
+    server_name 185.7.62.33; # todo: labs.digipost.no
+    include /etc/nginx/include.d/labs-ssl;
+    ssl_certificate /home/dpost/ssl/server-labs.crt;
+    ssl_certificate_key /home/dpost/ssl/server-labs.key;
+
+    # Backend routing
+    location /api {
+        include /etc/nginx/include.d/labs-proxy;
+        proxy_pass http://labs_backend_prod;
+    }
+
+    # Static files
+    root /var/www/html/prod/labs/current/;
+
+    # Frontend routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+# Test Server
+server {
+    listen 443;
+    server_name test.labs.digipost.no;
+    include /etc/nginx/include.d/labs-ssl;
+    ssl_certificate /home/dpost/ssl/server-test-labs.crt;
+    ssl_certificate_key /home/dpost/ssl/server-test-labs.key;
+
+    # Backend routing
+    location /api {
+        include /etc/nginx/include.d/labs-proxy;
+        proxy_pass http://labs_backend_test;
+    }
+
+    # Static files
+    root /var/www/html/test/labs/current/;
+
+    # Frontend routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

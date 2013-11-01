@@ -1,0 +1,32 @@
+- name: update authorized_keys
+  copy: src=authorized_keys dest=${home_path}/.ssh/authorized_keys mode=0600
+
+- name: create log directory
+  file: path=/var/logs/${artifact} owner={{ ansible_user_id }} group={{ ansible_user_id }} mode=0740 state=directory
+  sudo: yes
+
+- name: ensure that secret.conf exists
+  file: path=${env_path}/secret.conf owner={{ ansible_user_id }} group={{ ansible_user_id }} mode=0640 state=file
+
+- name: create deploy directory
+  file: path=${deploy_dir} owner={{ ansible_user_id }} group={{ ansible_user_id }} mode=0740 state=directory
+
+- name: copy init script to server
+  copy: src=init.sh dest=/etc/init.d/${env}_myapp mode=0750
+  sudo: yes
+
+- name: upload app
+  copy: src=../../../../backend/target/universal/${deploy_artifact}.tgz dest=${deploy_dir} owner={{ ansible_user_id }} mode=0640
+
+- command: tar xvf ${deploy_artifact}.tgz chdir=${deploy_dir} creates=${deploy_dir}/${deploy_artifact}/bin/${artifact}
+
+- name: link to current release and restart application
+  file: dest=${env_path}/current src=${deploy_dir}/${deploy_artifact} owner={{ ansible_user_id }} group={{ ansible_user_id }} state=link force=yes
+  notify:
+    - restart app
+
+- name: remove .tgz file
+  file: name=${env_path}/current/${deploy_artifact}.tgz state=absent
+
+- shell: ls -trd1 ${env_path}/[[:digit:]]* | head -n -3 | xargs rm -Rf
+

@@ -1,0 +1,7 @@
+- name: create config for mongodb
+  copy: src=mongodb.conf dest=/etc/mongodb.conf owner={{ ansible_user_id }} mode=0644
+  sudo: yes
+  notify:
+    - restart mongodb
+  tags:
+    - mongodb

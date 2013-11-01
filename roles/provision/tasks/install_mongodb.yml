@@ -1,0 +1,7 @@
+- name: ensure installed mongodb
+  apt: pkg=mongodb-10gen state=installed
+  sudo: yes
+  notify: restart mongodb
+  tags:
+    - mongodb
+

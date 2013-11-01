@@ -1,0 +1,32 @@
+- name: create config for nginx
+  copy: src=nginx.conf dest=/etc/nginx/nginx.conf owner={{ ansible_user_id }} group={{ ansible_user_id }} mode=0644
+  sudo: yes
+  tags:
+    - nginx
+
+- name: create sites-available for nginx
+  copy: src=sites-available/${artifact} dest=/etc/nginx/sites-available/ owner={{ ansible_user_id }} group={{ ansible_user_id }} mode=0644
+  sudo: yes
+  tags:
+    - nginx
+
+- name: create include.d/${artifact}-proxy file for nginx
+  copy: src=include.d/${artifact}-proxy dest=/etc/nginx/include.d/ owner={{ ansible_user_id }} group={{ ansible_user_id }} mode=0644
+  sudo: yes
+  tags:
+    - nginx
+
+- name: create include.d/${artifact}-ssl file for nginx
+  copy: src=include.d/${artifact}-ssl dest=/etc/nginx/include.d/ owner={{ ansible_user_id }} group={{ ansible_user_id }} mode=0644
+  sudo: yes
+  tags:
+    - nginx
+
+- name: remove default config
+  file: path=/etc/nginx/conf.d/default.conf state=absent
+  sudo: yes
+  notify:
+    - reload nginx
+  tags:
+    - nginx
+
